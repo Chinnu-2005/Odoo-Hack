@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
-const validateProduct = require('./validateProduct');
+const productRoutes=require('./routes/productRoutes')
+const authRoutes=require('./routes/auth')
 
 app.use(express.json());
 
