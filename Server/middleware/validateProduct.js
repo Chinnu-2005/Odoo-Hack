@@ -1,3 +1,4 @@
+// validateProduct.js
 
 function validateProduct(req, res, next) {
   const {
