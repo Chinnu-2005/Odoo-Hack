@@ -1,5 +1,7 @@
 const express = require('express');
 
+const cors = require('cors');
+
 
 require('dotenv').config();
 const mongoose=require('mongoose')
@@ -9,6 +11,7 @@ const connectDB = require('./db');
 connectDB();
 
 const app = express();
+app.use(cors());
 const productRoutes=require('./routes/productRoutes')
 const authRoutes=require('./routes/auth')
 const dbCheck=require('./middleware/dbCheck');
