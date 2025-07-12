@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Eye, EyeOff, Recycle, Mail, Lock, AlertCircle } from "lucide-react";
 
+<<<<<<< HEAD
+const LoginPage = ({ isOpen, onClose, onNavigate }) => {
+=======
 // Utility to read cookie
 const getCookie = (name) => {
   const value = `; ${document.cookie}`;
@@ -10,6 +13,7 @@ const getCookie = (name) => {
 };
 
 const LoginPage = ({ isOpen, onClose }) => {
+>>>>>>> f1813731ec3119fab92421b81358f3d1e4db303e
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,6 +47,35 @@ const LoginPage = ({ isOpen, onClose }) => {
   setIsLoading(true);
   setError("");
 
+<<<<<<< HEAD
+    // Simulate login process
+    try {
+      const api = "http://localhost:3000/auth/login/";
+      fetch(api, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      }).then((response) => {
+        if (!response.ok) {
+          setError("Invalid email or password. Try demo@rewear.com / password");
+        } else {
+          onClose();
+          // Navigate to dashboard after successful login
+          if (onNavigate) {
+            onNavigate("dashboard");
+          }
+          console.log("Login successful!");
+        }
+      });
+    } catch (err) {
+      console.log(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+=======
   try {
     const res = await fetch(loginApi, {
       method: "POST",
@@ -52,6 +85,7 @@ const LoginPage = ({ isOpen, onClose }) => {
       body: JSON.stringify({ email, password }),
       credentials: "include",
     });
+>>>>>>> f1813731ec3119fab92421b81358f3d1e4db303e
 
     const data = await res.json();
     if (!res.ok) {

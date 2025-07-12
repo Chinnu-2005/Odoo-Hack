@@ -32,13 +32,13 @@ const Header = ({ onNavigate }) => {
                 Home
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all duration-200 group-hover:w-full"></span>
               </a>
-              <a
-                href="#"
+              <button
+                onClick={() => onNavigate("browse")}
                 className="text-gray-700 hover:text-green-600 font-medium transition-colors duration-200 relative group"
               >
                 Browse Items
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all duration-200 group-hover:w-full"></span>
-              </a>
+              </button>
               <a
                 href="#"
                 className="text-gray-700 hover:text-green-600 font-medium transition-colors duration-200 relative group"
@@ -46,14 +46,21 @@ const Header = ({ onNavigate }) => {
                 List an Item
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all duration-200 group-hover:w-full"></span>
               </a>
+              <button
+                onClick={() => onNavigate("admin")}
+                className="text-gray-700 hover:text-green-600 font-medium transition-colors duration-200 relative group"
+              >
+                Admin
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all duration-200 group-hover:w-full"></span>
+              </button>
               {isLoggedIn && (
-                <a
-                  href="#"
+                <button
+                  onClick={() => onNavigate("dashboard")}
                   className="text-gray-700 hover:text-green-600 font-medium transition-colors duration-200 relative group"
                 >
                   Dashboard
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all duration-200 group-hover:w-full"></span>
-                </a>
+                </button>
               )}
             </div>
 
@@ -112,25 +119,31 @@ const Header = ({ onNavigate }) => {
                 >
                   Home
                 </a>
-                <a
-                  href="#"
-                  className="block px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md font-medium transition-colors duration-200"
+                <button
+                  onClick={() => onNavigate("browse")}
+                  className="w-full text-left px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md font-medium transition-colors duration-200"
                 >
                   Browse Items
-                </a>
+                </button>
                 <a
                   href="#"
                   className="block px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md font-medium transition-colors duration-200"
                 >
                   List an Item
                 </a>
+                <button
+                  onClick={() => onNavigate("admin")}
+                  className="w-full text-left px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md font-medium transition-colors duration-200"
+                >
+                  Admin
+                </button>
                 {isLoggedIn && (
-                  <a
-                    href="#"
-                    className="block px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md font-medium transition-colors duration-200"
+                  <button
+                    onClick={() => onNavigate("dashboard")}
+                    className="w-full text-left px-3 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-md font-medium transition-colors duration-200"
                   >
                     Dashboard
-                  </a>
+                  </button>
                 )}
 
                 {/* Mobile User Actions */}
@@ -166,7 +179,11 @@ const Header = ({ onNavigate }) => {
       </header>
 
       {/* Login Modal */}
-      <LoginPage isOpen={isLoginModalOpen} onClose={closeLoginModal} />
+      <LoginPage
+        isOpen={isLoginModalOpen}
+        onClose={closeLoginModal}
+        onNavigate={onNavigate}
+      />
     </>
   );
 };

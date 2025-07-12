@@ -36,7 +36,10 @@ const HeroSection = ({ onNavigate }) => {
             <Recycle className="h-5 w-5" />
             Start Swapping
           </button>
-          <button className="border-2 border-green-600 text-green-700 hover:bg-green-50 px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto bg-transparent flex items-center justify-center gap-2">
+          <button 
+            onClick={() => onNavigate("browse")}
+            className="border-2 border-green-600 text-green-700 hover:bg-green-50 px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto bg-transparent flex items-center justify-center gap-2"
+          >
             Browse Items
             <ArrowRight className="h-5 w-5" />
           </button>
