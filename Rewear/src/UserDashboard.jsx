@@ -12,18 +12,25 @@ import {
   Heart,
 } from "lucide-react";
 
+
+const response = await fetch("http://localhost:3000/auth/details/", {
+  method: "GET",
+  credentials: "include",
+});
+
+const userData = await response.json();
+
 const userStats = {
-  name: "Lakshman",
-  fullName: "Lakshman Kumar",
+  name:userData.fullName.split(' ')[0] || "Unknown User",
+  fullName:  userData.fullName || "Unknown User",
   avatar:
     "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face",
   trustScore: 4.8,
-  points: 1250,
+  points: userData.points || 0,
   totalSwaps: 23,
-  co2Saved: 45.6,
-  waterSaved: 34200,
+  co2Saved: userData.co2 || 0,
+  waterSaved: userData.waterSaved || 0,
 };
-
 const uploadedItems = [
   {
     id: 1,

@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { AuthProvider } from "./contexts/AuthContext";
+import ErrorBoundary from "./components/ErrorBoundary";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./Header";
 import HeroSection from "./HeroSection";
 import FeaturedItems from "./FeaturedItems";
@@ -18,17 +21,33 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case "register":
-        return <RegisterPage onNavigate={setCurrentPage} />;
+        return (
+          <ProtectedRoute requireAuth={false}>
+            <RegisterPage onNavigate={setCurrentPage} />
+          </ProtectedRoute>
+        );
       case "browse":
         return <BrowseProducts onNavigate={setCurrentPage} />;
       case "item-detail":
         return <ItemDetail onNavigate={setCurrentPage} />;
       case "admin":
-        return <AdminDashboard onNavigate={setCurrentPage} />;
+        return (
+          <ProtectedRoute requireAuth={true} requireAdmin={true}>
+            <AdminDashboard onNavigate={setCurrentPage} />
+          </ProtectedRoute>
+        );
       case "dashboard":
-        return <UserDashboard onNavigate={setCurrentPage} />;
+        return (
+          <ProtectedRoute requireAuth={true}>
+            <UserDashboard onNavigate={setCurrentPage} />
+          </ProtectedRoute>
+        );
       case "add-item":
-        return <AddNewItem onNavigate={setCurrentPage} />;
+        return (
+          <ProtectedRoute requireAuth={true}>
+            <AddNewItem onNavigate={setCurrentPage} />
+          </ProtectedRoute>
+        );
       case "home":
       default:
         return (
@@ -43,7 +62,13 @@ function App() {
     }
   };
 
-  return <div className="min-h-screen bg-white">{renderPage()}</div>;
+  return (
+    <ErrorBoundary>
+      <AuthProvider>
+        <div className="min-h-screen bg-white">{renderPage()}</div>
+      </AuthProvider>
+    </ErrorBoundary>
+  );
 }
 
 export default App;

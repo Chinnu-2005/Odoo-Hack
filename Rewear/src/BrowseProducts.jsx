@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   Grid3X3,
@@ -11,130 +11,53 @@ import {
   Package,
   SlidersHorizontal,
   X,
+  Loader2,
+  Menu,
 } from "lucide-react";
+import productService from "./services/productService";
+import { useAuth } from "./contexts/AuthContext";
 
 const categories = [
   "All Categories",
-  "Tops & T-Shirts",
-  "Jackets & Coats",
-  "Dresses",
-  "Pants & Jeans",
-  "Skirts",
-  "Shoes",
-  "Accessories",
-  "Activewear",
-  "Formal Wear",
+  "clothing",
+  "electronics",
+  "footwear",
+  "accessories",
+  "furniture",
+  "cosmetics",
+  "groceries",
+  "paper",
 ];
 
 const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 const conditions = ["Like New", "Excellent", "Good", "Fair"];
 
-const sampleProducts = [
-  {
-    id: 1,
-    title: "Vintage Denim Jacket",
+// Helper function to map API data to component format
+const mapApiProductToComponent = (apiProduct) => {
+  return {
+    id: apiProduct._id,
+    title: apiProduct.name,
     image:
-      "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=300&h=300&fit=crop",
-    condition: "Excellent",
-    size: "M",
-    category: "Jackets & Coats",
-    co2Saved: 2.5,
-    waterSaved: 1800,
-    location: "San Francisco, CA",
-    uploader: "Emma Wilson",
-    uploaderRating: 4.9,
-    postedDate: "2024-01-20",
-    tags: ["vintage", "denim", "casual"],
+      apiProduct.image ||
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&text=Product",
+    condition: apiProduct.condition || "Good",
+    size: apiProduct.sizes,
+    category: apiProduct.category,
+    co2Saved: apiProduct.co2,
+    waterSaved: apiProduct.water,
+    location: "India", // Default location since API doesn't provide it
+    uploader: apiProduct.email,
+    uploaderRating: 4.5, // Default rating since API doesn't provide it
+    postedDate: apiProduct.createdAt,
+    tags: apiProduct.colors || [],
     isFavorited: false,
-  },
-  {
-    id: 2,
-    title: "Designer Wool Coat",
-    image:
-      "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=300&h=300&fit=crop",
-    condition: "Good",
-    size: "L",
-    category: "Jackets & Coats",
-    co2Saved: 4.2,
-    waterSaved: 3200,
-    location: "New York, NY",
-    uploader: "Sarah Johnson",
-    uploaderRating: 4.7,
-    postedDate: "2024-01-19",
-    tags: ["designer", "wool", "formal"],
-    isFavorited: true,
-  },
-  {
-    id: 3,
-    title: "Cotton Summer Dress",
-    image:
-      "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&h=300&fit=crop",
-    condition: "Like New",
-    size: "S",
-    category: "Dresses",
-    co2Saved: 1.8,
-    waterSaved: 2400,
-    location: "Los Angeles, CA",
-    uploader: "Mike Chen",
-    uploaderRating: 4.8,
-    postedDate: "2024-01-18",
-    tags: ["cotton", "summer", "casual"],
-    isFavorited: false,
-  },
-  {
-    id: 4,
-    title: "Leather Boots",
-    image:
-      "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=300&fit=crop",
-    condition: "Good",
-    size: "9",
-    category: "Shoes",
-    co2Saved: 3.1,
-    waterSaved: 2800,
-    location: "Chicago, IL",
-    uploader: "Lisa Park",
-    uploaderRating: 4.6,
-    postedDate: "2024-01-17",
-    tags: ["leather", "boots", "winter"],
-    isFavorited: false,
-  },
-  {
-    id: 5,
-    title: "Silk Blouse",
-    image:
-      "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=300&h=300&fit=crop",
-    condition: "Excellent",
-    size: "M",
-    category: "Tops & T-Shirts",
-    co2Saved: 2.3,
-    waterSaved: 1900,
-    location: "Seattle, WA",
-    uploader: "Alex Rodriguez",
-    uploaderRating: 4.9,
-    postedDate: "2024-01-16",
-    tags: ["silk", "formal", "elegant"],
-    isFavorited: false,
-  },
-  {
-    id: 6,
-    title: "Athletic Sneakers",
-    image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop",
-    condition: "Good",
-    size: "8.5",
-    category: "Shoes",
-    co2Saved: 2.7,
-    waterSaved: 2100,
-    location: "Austin, TX",
-    uploader: "Jordan Kim",
-    uploaderRating: 4.5,
-    postedDate: "2024-01-15",
-    tags: ["athletic", "sneakers", "sports"],
-    isFavorited: true,
-  },
-];
+    price: apiProduct.price,
+    brand: apiProduct.brand,
+  };
+};
 
 export default function BrowseProducts({ onNavigate }) {
+  const { isAuthenticated } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [selectedSizes, setSelectedSizes] = useState([]);
@@ -143,7 +66,30 @@ export default function BrowseProducts({ onNavigate }) {
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState("grid");
   const [showFilters, setShowFilters] = useState(false);
-  const [products, setProducts] = useState(sampleProducts);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const apiProducts = await productService.getProducts();
+        const mappedProducts = apiProducts.map(mapApiProductToComponent);
+        setProducts(mappedProducts);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError("Failed to load products. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const toggleFavorite = (productId) => {
     setProducts(
@@ -209,20 +155,81 @@ export default function BrowseProducts({ onNavigate }) {
             <span className="text-xl font-bold text-green-800">ReWear</span>
           </button>
           <nav className="hidden md:flex items-center gap-4">
-            <button
-              onClick={() => onNavigate("dashboard")}
-              className="px-4 py-2 text-gray-700 hover:text-green-600 transition-colors"
-            >
-              Dashboard
-            </button>
-            <button
-              onClick={() => onNavigate("add-item")}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-            >
-              List Item
-            </button>
+            {isAuthenticated && (
+              <button
+                onClick={() => onNavigate("dashboard")}
+                className="px-4 py-2 text-gray-700 hover:text-green-600 transition-colors"
+              >
+                Dashboard
+              </button>
+            )}
+            {isAuthenticated && (
+              <button
+                onClick={() => onNavigate("add-item")}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              >
+                List Item
+              </button>
+            )}
+            {!isAuthenticated && (
+              <button
+                onClick={() => onNavigate("login")}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              >
+                Login
+              </button>
+            )}
           </nav>
+
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className="md:hidden p-2 text-gray-700 hover:text-green-600 transition-colors"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
         </div>
+
+        {/* Mobile menu */}
+        {showMobileMenu && (
+          <div className="md:hidden bg-white border-t border-gray-200 py-4">
+            <div className="flex flex-col space-y-2 px-4">
+              {isAuthenticated && (
+                <button
+                  onClick={() => {
+                    onNavigate("dashboard");
+                    setShowMobileMenu(false);
+                  }}
+                  className="px-4 py-2 text-gray-700 hover:text-green-600 transition-colors text-left"
+                >
+                  Dashboard
+                </button>
+              )}
+              {isAuthenticated && (
+                <button
+                  onClick={() => {
+                    onNavigate("add-item");
+                    setShowMobileMenu(false);
+                  }}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-left"
+                >
+                  List Item
+                </button>
+              )}
+              {!isAuthenticated && (
+                <button
+                  onClick={() => {
+                    onNavigate("login");
+                    setShowMobileMenu(false);
+                  }}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-left"
+                >
+                  Login
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </header>
 
       <div className="container mx-auto px-4 py-6">
@@ -438,169 +445,223 @@ export default function BrowseProducts({ onNavigate }) {
           )}
         </div>
 
-        {/* Products Grid/List */}
-        {viewMode === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white rounded-lg shadow-sm border group hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => onNavigate("item-detail")}
-              >
-                <div className="p-0">
-                  <div className="relative overflow-hidden rounded-t-lg">
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                    />
-                    <div className="absolute top-2 left-2">
-                      <span className="inline-flex px-2 py-1 bg-green-600 text-white text-xs rounded-full">
-                        {product.condition}
-                      </span>
-                    </div>
-                    <div className="absolute top-2 right-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(product.id);
-                        }}
-                        className="h-8 w-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center"
-                      >
-                        <Heart
-                          className={`h-4 w-4 ${
-                            product.isFavorited
-                              ? "fill-red-500 text-red-500"
-                              : "text-gray-600"
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-gray-900 mb-2 hover:text-green-600 transition-colors">
-                    {product.title}
-                  </h3>
-
-                  <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
-                    <span className="inline-flex px-2 py-1 border border-gray-300 text-xs rounded">
-                      Size {product.size}
-                    </span>
-                    <span>•</span>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      <span>{product.location}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                    <div className="flex items-center gap-1">
-                      <Leaf className="h-4 w-4 text-green-600" />
-                      <span>{product.co2Saved}kg CO₂</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Droplets className="h-4 w-4 text-blue-600" />
-                      <span>{product.waterSaved}L</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
-                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                      <span>{product.uploaderRating}</span>
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      {new Date(product.postedDate).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-12">
+            <Loader2 className="h-12 w-12 text-green-600 animate-spin mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Loading products...
+            </h3>
+            <p className="text-gray-600">
+              Please wait while we fetch the latest items.
+            </p>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => onNavigate("item-detail")}
-              >
-                <div className="p-4">
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      className="w-24 h-24 rounded-lg object-cover hover:opacity-80 transition-opacity"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900 hover:text-green-600 transition-colors">
-                          {product.title}
-                        </h3>
-                        <button
-                          onClick={() => toggleFavorite(product.id)}
-                          className="p-2 hover:bg-gray-100 rounded-full"
-                        >
-                          <Heart
-                            className={`h-4 w-4 ${
-                              product.isFavorited
-                                ? "fill-red-500 text-red-500"
-                                : "text-gray-600"
-                            }`}
-                          />
-                        </button>
-                      </div>
+        )}
 
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="inline-flex px-2 py-1 bg-green-600 text-white text-xs rounded-full">
-                          {product.condition}
-                        </span>
+        {/* Error State */}
+        {error && !loading && (
+          <div className="text-center py-12">
+            <Package className="h-16 w-16 text-red-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Error loading products
+            </h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Products Grid/List */}
+        {!loading && !error && (
+          <>
+            {viewMode === "grid" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-white rounded-lg shadow-sm border group hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => onNavigate("item-detail")}
+                  >
+                    <div className="p-0">
+                      <div className="relative overflow-hidden rounded-t-lg">
+                        <img
+                          src={product.image}
+                          alt={product.title}
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                        />
+                        <div className="absolute top-2 left-2">
+                          <span className="inline-flex px-2 py-1 bg-green-600 text-white text-xs rounded-full">
+                            {product.condition}
+                          </span>
+                        </div>
+                        <div className="absolute top-2 right-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavorite(product.id);
+                            }}
+                            className="h-8 w-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center"
+                          >
+                            <Heart
+                              className={`h-4 w-4 ${
+                                product.isFavorited
+                                  ? "fill-red-500 text-red-500"
+                                  : "text-gray-600"
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-900 mb-1 hover:text-green-600 transition-colors">
+                        {product.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-2">
+                        {product.brand}
+                      </p>
+
+                      <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
                         <span className="inline-flex px-2 py-1 border border-gray-300 text-xs rounded">
                           Size {product.size}
                         </span>
-                        <span className="inline-flex px-2 py-1 border border-gray-300 text-xs rounded">
-                          {product.category}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-6 text-sm text-gray-600 mb-2">
+                        <span>•</span>
                         <div className="flex items-center gap-1">
-                          <Leaf className="h-4 w-4 text-green-600" />
-                          <span>{product.co2Saved}kg CO₂ saved</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Droplets className="h-4 w-4 text-blue-600" />
-                          <span>{product.waterSaved}L water saved</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
+                          <MapPin className="h-3 w-3" />
                           <span>{product.location}</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <span>by {product.uploader}</span>
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                            <span>{product.uploaderRating}</span>
-                          </div>
+                      <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                        <div className="flex items-center gap-1">
+                          <Leaf className="h-4 w-4 text-green-600" />
+                          <span>{product.co2Saved}kg CO₂</span>
                         </div>
-                        <span className="text-sm text-gray-500">
-                          {new Date(product.postedDate).toLocaleDateString()}
-                        </span>
+                        <div className="flex items-center gap-1">
+                          <Droplets className="h-4 w-4 text-blue-600" />
+                          <span>{product.waterSaved}L</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                          <span>{product.uploaderRating}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-green-600">
+                            ₹{product.price}
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {new Date(product.postedDate).toLocaleDateString()}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => onNavigate("item-detail")}
+                  >
+                    <div className="p-4">
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={product.image}
+                          alt={product.title}
+                          className="w-24 h-24 rounded-lg object-cover hover:opacity-80 transition-opacity"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-900 hover:text-green-600 transition-colors">
+                                {product.title}
+                              </h3>
+                              <p className="text-sm text-gray-600">
+                                {product.brand}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => toggleFavorite(product.id)}
+                              className="p-2 hover:bg-gray-100 rounded-full"
+                            >
+                              <Heart
+                                className={`h-4 w-4 ${
+                                  product.isFavorited
+                                    ? "fill-red-500 text-red-500"
+                                    : "text-gray-600"
+                                }`}
+                              />
+                            </button>
+                          </div>
+
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="inline-flex px-2 py-1 bg-green-600 text-white text-xs rounded-full">
+                              {product.condition}
+                            </span>
+                            <span className="inline-flex px-2 py-1 border border-gray-300 text-xs rounded">
+                              Size {product.size}
+                            </span>
+                            <span className="inline-flex px-2 py-1 border border-gray-300 text-xs rounded">
+                              {product.category}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-6 text-sm text-gray-600 mb-2">
+                            <div className="flex items-center gap-1">
+                              <Leaf className="h-4 w-4 text-green-600" />
+                              <span>{product.co2Saved}kg CO₂ saved</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Droplets className="h-4 w-4 text-blue-600" />
+                              <span>{product.waterSaved}L water saved</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              <span>{product.location}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <span>by {product.uploader}</span>
+                              <div className="flex items-center gap-1">
+                                <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                                <span>{product.uploaderRating}</span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-green-600">
+                                ₹{product.price}
+                              </div>
+                              <span className="text-sm text-gray-500">
+                                {new Date(
+                                  product.postedDate
+                                ).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {/* No Results */}
-        {filteredProducts.length === 0 && (
+        {!loading && !error && filteredProducts.length === 0 && (
           <div className="text-center py-12">
             <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">

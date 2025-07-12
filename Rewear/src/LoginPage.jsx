@@ -1,19 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Eye, EyeOff, Recycle, Mail, Lock, AlertCircle } from "lucide-react";
+import React, { useState } from "react";
+import { Eye, EyeOff, Mail, Lock, AlertCircle } from "lucide-react";
+import { useAuth } from "./contexts/AuthContext";
 
-<<<<<<< HEAD
 const LoginPage = ({ isOpen, onClose, onNavigate }) => {
-=======
-// Utility to read cookie
-const getCookie = (name) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-  return null;
-};
-
-const LoginPage = ({ isOpen, onClose }) => {
->>>>>>> f1813731ec3119fab92421b81358f3d1e4db303e
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,87 +10,36 @@ const LoginPage = ({ isOpen, onClose }) => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const loginApi = "http://localhost:3000/auth/login/";
-  const validateTokenApi = "http://localhost:3000/auth/validate-token";
-
-  // 🔐 Auto-login check on mount
-  useEffect(() => {
-  fetch(validateTokenApi, {
-    method: "GET",
-    credentials: "include", // includes the token cookie
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.userId) {
-        console.log("Token is valid. Auto-login.");
-        onClose();
-      } else {
-        console.log(data);
-      }
-    })
-    .catch((err) => console.log(err));
-}, []);
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setError("");
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
-<<<<<<< HEAD
-    // Simulate login process
     try {
-      const api = "http://localhost:3000/auth/login/";
-      fetch(api, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      }).then((response) => {
-        if (!response.ok) {
-          setError("Invalid email or password. Try demo@rewear.com / password");
-        } else {
-          onClose();
-          // Navigate to dashboard after successful login
-          if (onNavigate) {
-            onNavigate("dashboard");
-          }
-          console.log("Login successful!");
+      const result = await login(email, password);
+
+      if (result.success) {
+        console.log("Login successful!");
+        onClose();
+        // Navigate to dashboard after successful login
+        if (onNavigate) {
+          onNavigate("dashboard");
         }
-      });
+      } else {
+        setError(
+          result.error ||
+            "Invalid email or password. Try demo@rewear.com / password"
+        );
+      }
     } catch (err) {
       console.log(err.message);
+      setError("Server error. Try again later.");
     } finally {
       setIsLoading(false);
     }
   };
-=======
-  try {
-    const res = await fetch(loginApi, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-      credentials: "include",
-    });
->>>>>>> f1813731ec3119fab92421b81358f3d1e4db303e
-
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || "Invalid email or password");
-    } else {
-      console.log("Login successful!");
-      onClose();
-    }
-  } catch (err) {
-    console.log(err.message);
-    setError("Server error. Try again later.");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
 
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) onClose();
@@ -132,7 +70,12 @@ const LoginPage = ({ isOpen, onClose }) => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-gray-700">Email</label>
+              <label
+                htmlFor="email"
+                className="text-sm font-medium text-gray-700"
+              >
+                Email
+              </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
@@ -148,7 +91,12 @@ const LoginPage = ({ isOpen, onClose }) => {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium text-gray-700">Password</label>
+              <label
+                htmlFor="password"
+                className="text-sm font-medium text-gray-700"
+              >
+                Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
@@ -165,7 +113,11 @@ const LoginPage = ({ isOpen, onClose }) => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -183,7 +135,12 @@ const LoginPage = ({ isOpen, onClose }) => {
                   Remember me
                 </label>
               </div>
-              <a href="#" className="text-sm text-green-600 hover:text-green-700">Forgot password?</a>
+              <a
+                href="#"
+                className="text-sm text-green-600 hover:text-green-700"
+              >
+                Forgot password?
+              </a>
             </div>
 
             <button
@@ -198,7 +155,12 @@ const LoginPage = ({ isOpen, onClose }) => {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{" "}
-              <a href="#" className="text-green-600 hover:text-green-700 font-medium">Sign up for free</a>
+              <a
+                href="#"
+                className="text-green-600 hover:text-green-700 font-medium"
+              >
+                Sign up for free
+              </a>
             </p>
           </div>
         </div>

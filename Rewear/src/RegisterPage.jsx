@@ -74,35 +74,37 @@ const RegisterPage = ({ onNavigate }) => {
       return;
     }
 
-    // Simulate registration process
+    // Registration process
     try {
-      const api = "http://localhost:3000/auth/register/";
-      fetch(api, {
+      const api = "http://localhost:3000/auth/register";
+      const response = await fetch(api, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          "fullName":formData.firstName+" "+formData.lastName,
-          "email":formData.email,
-          "password":formData.password,
-          "confirmPassword":formData.confirmPassword,
-          "location":formData.location,
-          "agreeToTerms":"true",
-          "phoneNumber":formData.phoneNumber
+          fullName: formData.firstName + " " + formData.lastName,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          phoneNumber: formData.phoneNumber,
+          location: formData.location,
+          agreeToTerms: true,
         }),
-      }).then((response) => {
-        if (!response.ok) {
-          console.log(response.body)
-          setError("Invalid email or password. Try demo@rewear.com / password");
-        }else {
-          // You can add navigation logic here later
-          console.log("Registration successful!");        }
       });
-      
-      // You can add navigation logic here later
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Registration failed. Please try again.");
+      } else {
+        console.log("Registration successful!", data);
+        // Navigate to login or dashboard
+        onNavigate("login");
+      }
     } catch (err) {
-      console.log(err.message);
+      console.error("Registration error:", err);
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setIsLoading(false);
     }
