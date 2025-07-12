@@ -3,7 +3,7 @@ const router = express.Router();
 const validateProduct = require('../middleware/validateProduct');
 
 // POST /api/products
-router.post('/add/',await validateProduct, (req, res) => {
+router.post('/add/', validateProduct, (req, res) => {
   const product = req.body;
   // You can store this in a DB instead
   res.status(201).json({

@@ -19,6 +19,10 @@ const itemSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  color:{
+    type:String,
+    required:true
+  },
   condition: {
     type: String,
     required: true
