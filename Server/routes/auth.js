@@ -1,41 +1,44 @@
 const express = require('express');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const validateRegister = require('../middleware/validateRegister');
+const User = require('../models/User');
+
 
 router.post('/register', validateRegister, async (req, res) => {
-  const {
-    fullName,
-    email,
-    password,
-    phoneNumber,
-    location,
-  } = req.body;
+  const { fullName, email, password, phoneNumber, location, profileImage } = req.body;
 
   try {
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ error: 'User already exists with this email' });
+    }
 
-    const newUser = {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
       fullName,
       email,
       phoneNumber,
-      location,
       password: hashedPassword,
-    };
-
-    // In real apps, insert into DB here
-    res.status(201).json({
-      message: 'User registered successfully',
-      user: {
-        fullName,
-        email,
-      }
+      location,
+      profileImage,
     });
+
+    await newUser.save();
+
+    const token = jwt.sign(
+      { userId: newUser._id, email: newUser.email },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    );
+
+    res.status(201).json({ message: 'User registered successfully', token });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Something went wrong' });
+    console.error('❌ Registration error:', err.message);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
