@@ -6,8 +6,8 @@ async function validateProduct(req, res, next) {
     brand,
     category,
     price,
-    sizes,
-    colors,
+    size,
+    color,
     image,
   } = req.body;
 
