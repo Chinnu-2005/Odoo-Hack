@@ -15,11 +15,11 @@ const itemSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  size: {
+  sizes: {
     type: String,
     required: true
   },
-  color:{
+  colors:{
     type:String,
     required:true
   },

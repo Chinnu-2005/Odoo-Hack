@@ -37,24 +37,41 @@ router.post('/register', validateRegister, async (req, res) => {
 
     res.status(201).json({ message: 'User registered successfully', token });
   } catch (err) {
-    console.error('❌ Registration error:', err.message);
+    console.error('Registration error:', err.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-router.post('/login',async (req, res) => {
-  const { username, password } = req.body;
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
 
-  if (username === 'admin' &&  await bcrypt.compare(password, hashedPassword)) {
-    const token = jwt.sign({ username, role: 'admin' }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
-    res.json({ token });
-  } else {
-    res.status(401).json({ error: 'Invalid credentials' });
+  // 1. Validate input
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
+  try {
+    // 2. Find user
+    const user = await User.findOne({ email });
+    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+
+    // 3. Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
+
+    // 4. Generate JWT
+    const token = jwt.sign(
+      { userId: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    );
+
+    res.status(200).json({ token, message: 'Login successful' });
+  } catch (err) {
+    console.error('Login error:', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
 });
-
 router.use(authMiddleware);
 
 // Protected route

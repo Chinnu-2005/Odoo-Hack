@@ -16,17 +16,23 @@ const LoginPage = ({ isOpen, onClose }) => {
 
     // Simulate login process
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      if (email === "demo@rewear.com" && password === "password") {
-        // Successful login - close modal and redirect to dashboard
-        onClose();
-        // You can add navigation logic here later
-        console.log("Login successful!");
-      } else {
-        setError("Invalid email or password. Try demo@rewear.com / password");
-      }
+      await fetch(api, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      }).then((response) => {
+        if (!response.ok) {
+          setError("Invalid email or password. Try demo@rewear.com / password");
+        }else {
+          onClose();
+          // You can add navigation logic here later
+          console.log("Login successful!");
+        }
+      });
     } catch (err) {
+      console.log("Login error:", err.message);
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
