@@ -1,0 +1,65 @@
+
+function validateProduct(req, res, next) {
+  const {
+    id,
+    name,
+    brand,
+    category,
+    price,
+    sizes,
+    colors,
+    image,
+    inStock,
+    co2Saved,
+    waterSaved
+  } = req.body;
+
+  // Basic field checks
+  if (!id || typeof id !== "string") {
+    return res.status(400).json({ error: "Invalid or missing 'id'" });
+  }
+
+  if (!name || typeof name !== "string") {
+    return res.status(400).json({ error: "Invalid or missing 'name'" });
+  }
+
+  if (!brand || typeof brand !== "string") {
+    return res.status(400).json({ error: "Invalid or missing 'brand'" });
+  }
+
+  if (!category || typeof category !== "string") {
+    return res.status(400).json({ error: "Invalid or missing 'category'" });
+  }
+
+  if (typeof price !== "number" || price < 0) {
+    return res.status(400).json({ error: "Invalid or missing 'price'" });
+  }
+
+  if (!Array.isArray(sizes) || sizes.length === 0) {
+    return res.status(400).json({ error: "Invalid or missing 'sizes'" });
+  }
+
+  if (!Array.isArray(colors) || colors.length === 0) {
+    return res.status(400).json({ error: "Invalid or missing 'colors'" });
+  }
+
+  if (!image || typeof image !== "string" || !image.startsWith("http")) {
+    return res.status(400).json({ error: "Invalid or missing 'image' URL" });
+  }
+
+  if (typeof inStock !== "boolean") {
+    return res.status(400).json({ error: "Invalid or missing 'inStock'" });
+  }
+
+  if (!co2Saved || typeof co2Saved !== "string" || !co2Saved.includes("kg")) {
+    return res.status(400).json({ error: "Invalid or missing 'co2Saved'" });
+  }
+
+  if (!waterSaved || typeof waterSaved !== "string" || !waterSaved.includes("L")) {
+    return res.status(400).json({ error: "Invalid or missing 'waterSaved'" });
+  }
+
+  next(); // Validation passed
+}
+
+module.exports = validateProduct;
