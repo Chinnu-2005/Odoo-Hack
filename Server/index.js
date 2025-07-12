@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const validateProduct = require('./validateProduct');
+const validateProduct = require('./utils/middleware/product_card');
 
 app.use(express.json());
 
