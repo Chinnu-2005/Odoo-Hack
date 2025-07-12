@@ -36,7 +36,7 @@ function validateProduct(req, res, next) {
     return res.status(400).json({ error: "Invalid or missing 'price'" });
   }
 
-  if (!Array.isArray(sizes) || sizes.length === 0) {
+  if (!sizes || typeof sizes !== "string") {
     return res.status(400).json({ error: "Invalid or missing 'sizes'" });
   }
 
