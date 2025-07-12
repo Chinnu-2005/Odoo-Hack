@@ -106,7 +106,7 @@ router.get('/validate-token', (req, res) => {
 
 // Protected route example
 router.use(authMiddleware);
-router.get('/dashboard', (req, res) => {
+router.get('/details', (req, res) => {
   res.json({ message: `Welcome ${req.user.email}, you are a ${req.user.role}` });
 });
 

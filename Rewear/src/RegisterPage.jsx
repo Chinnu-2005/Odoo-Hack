@@ -93,6 +93,7 @@ const RegisterPage = ({ onNavigate }) => {
         }),
       }).then((response) => {
         if (!response.ok) {
+          console.log(response.body)
           setError("Invalid email or password. Try demo@rewear.com / password");
         }else {
           // You can add navigation logic here later

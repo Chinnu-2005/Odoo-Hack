@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   phoneNumber: { type: String, required: true },
   password: { type: String, required: true },
   location: { type: String },
+  points:{type:Number,default:0}
 });
 
 module.exports = mongoose.model('User', userSchema); // Bound to default connection
