@@ -76,13 +76,32 @@ const RegisterPage = ({ onNavigate }) => {
 
     // Simulate registration process
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Successful registration - redirect to dashboard
-      console.log("Registration successful!");
+      const api = "http://localhost:3000/auth/register/";
+      fetch(api, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          "fullName":formData.firstName+" "+formData.lastName,
+          "email":formData.email,
+          "password":formData.password,
+          "confirmPassword":formData.confirmPassword,
+          "location":formData.location,
+          "agreeToTerms":"true",
+          "phoneNumber":formData.phoneNumber
+        }),
+      }).then((response) => {
+        if (!response.ok) {
+          setError("Invalid email or password. Try demo@rewear.com / password");
+        }else {
+          // You can add navigation logic here later
+          console.log("Registration successful!");        }
+      });
+      
       // You can add navigation logic here later
     } catch (err) {
-      setError("An error occurred during registration. Please try again.");
+      console.log(err.message);
     } finally {
       setIsLoading(false);
     }
