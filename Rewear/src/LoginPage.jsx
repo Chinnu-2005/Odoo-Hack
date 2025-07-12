@@ -16,6 +16,7 @@ const LoginPage = ({ isOpen, onClose }) => {
 
     // Simulate login process
     try {
+      const api = process.env.API_KEY+"auth/login/";
       await fetch(api, {
         method: "POST",
         headers: {
@@ -32,8 +33,7 @@ const LoginPage = ({ isOpen, onClose }) => {
         }
       });
     } catch (err) {
-      console.log("Login error:", err.message);
-      setError("An error occurred. Please try again.");
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
