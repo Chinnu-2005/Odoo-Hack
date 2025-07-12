@@ -1,4 +1,8 @@
 const express = require('express');
+require('dotenv').config();
+
+const mainConn = await mongoose.createConnection(process.env.MONGODB_URI);
+
 const app = express();
 const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/auth');

@@ -1,6 +1,6 @@
 // validateProduct.js
 
-function validateProduct(req, res, next) {
+async function validateProduct(req, res, next) {
   const {
     name,
     brand,
@@ -9,9 +9,6 @@ function validateProduct(req, res, next) {
     sizes,
     colors,
     image,
-    inStock,
-    co2Saved,
-    waterSaved
   } = req.body;
 
   // Basic field checks
@@ -43,17 +40,7 @@ function validateProduct(req, res, next) {
     return res.status(400).json({ error: "Invalid or missing 'image' URL" });
   }
 
-  if (typeof inStock !== "boolean") {
-    return res.status(400).json({ error: "Invalid or missing 'inStock'" });
-  }
-
-  if (!co2Saved || typeof co2Saved !== "string" || !co2Saved.includes("kg")) {
-    return res.status(400).json({ error: "Invalid or missing 'co2Saved'" });
-  }
-
-  if (!waterSaved || typeof waterSaved !== "string" || !waterSaved.includes("L")) {
-    return res.status(400).json({ error: "Invalid or missing 'waterSaved'" });
-  }
+  
 
   next(); // Validation passed
 }
