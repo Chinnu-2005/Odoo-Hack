@@ -105,9 +105,18 @@ router.get('/validate-token', (req, res) => {
 });
 
 // Protected route example
-router.use(authMiddleware);
-router.get('/details', (req, res) => {
-  res.json({ message: `Welcome ${req.user.email}, you are a ${req.user.role}` });
+// router.use(authMiddleware);
+router.get('/details', async(req, res) => {
+  try {
+    const user = await User.findOne(req.email).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error('Error fetching user:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 module.exports = router;

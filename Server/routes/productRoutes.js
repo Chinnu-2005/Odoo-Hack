@@ -14,6 +14,16 @@ router.post('/add/',validateProduct, async(req, res) => {
   }
 });
 
+router.get('/product-list', async (req, res) => {
+  try {
+    const products = await Product.find(); 
+    res.json(products);
+  } catch (err) {
+    console.error('Error fetching products:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 
 
 module.exports = router;
