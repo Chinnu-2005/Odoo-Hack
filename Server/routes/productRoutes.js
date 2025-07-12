@@ -12,4 +12,6 @@ router.post('/add/', validateProduct, (req, res) => {
   });
 });
 
+
+
 module.exports = router;

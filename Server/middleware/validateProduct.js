@@ -2,7 +2,6 @@
 
 function validateProduct(req, res, next) {
   const {
-    id,
     name,
     brand,
     category,
@@ -16,10 +15,6 @@ function validateProduct(req, res, next) {
   } = req.body;
 
   // Basic field checks
-  if (!id || typeof id !== "string") {
-    return res.status(400).json({ error: "Invalid or missing 'id'" });
-  }
-
   if (!name || typeof name !== "string") {
     return res.status(400).json({ error: "Invalid or missing 'name'" });
   }
