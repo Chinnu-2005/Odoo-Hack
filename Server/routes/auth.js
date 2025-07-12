@@ -105,7 +105,7 @@ router.get('/validate-token', (req, res) => {
 });
 
 // Protected route example
-// router.use(authMiddleware);
+router.use(authMiddleware);
 router.get('/details', async(req, res) => {
   try {
     const user = await User.findOne(req.email).select('-password');
