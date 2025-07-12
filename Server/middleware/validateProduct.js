@@ -28,11 +28,11 @@ async function validateProduct(req, res, next) {
     return res.status(400).json({ error: "Invalid or missing 'price'" });
   }
 
-  if (!sizes || typeof sizes !== "string") {
+  if (!size || typeof size !== "string") {
     return res.status(400).json({ error: "Invalid or missing 'sizes'" });
   }
 
-  if (!Array.isArray(colors) || colors.length === 0) {
+  if (!Array.isArray(color) || color.length === 0) {
     return res.status(400).json({ error: "Invalid or missing 'colors'" });
   }
 
