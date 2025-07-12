@@ -12,7 +12,11 @@
     "dev": "nodemon index.js"
   },
   "dependencies": {
+<<<<<<< HEAD
+    "bcrypt": "^6.0.0",
+=======
     "bcryptjs": "^3.0.2",
+>>>>>>> 7276531f2ccaf3bbc0c842debfcf3c65cd599a4a
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
