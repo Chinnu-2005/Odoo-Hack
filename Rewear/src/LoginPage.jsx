@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Recycle, Mail, Lock, AlertCircle } from "lucide-react";
 
-const LoginPage = ({ isOpen, onClose }) => {
+const LoginPage = ({ isOpen, onClose, onNavigate }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,9 +26,12 @@ const LoginPage = ({ isOpen, onClose }) => {
       }).then((response) => {
         if (!response.ok) {
           setError("Invalid email or password. Try demo@rewear.com / password");
-        }else {
+        } else {
           onClose();
-          // You can add navigation logic here later
+          // Navigate to dashboard after successful login
+          if (onNavigate) {
+            onNavigate("dashboard");
+          }
           console.log("Login successful!");
         }
       });
