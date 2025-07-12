@@ -17,9 +17,9 @@
 
 ## 👨‍💻 Team Members
 
-| Name                                 | Email                              |
-|--------------------------------------|------------------------------------|
-| Davu Gopi Kiran                      | gopikiran22001@yahoo.com           |
-| Lakshman Singh Naik                 | lakshmannaikbhukya17@gmail.com     |
-| Ganjam Kodanda Rama Venkata Koushik | gkrvkoushik@gmail.com              |
-| Annavarapu Venkata Naga Karthik     | annavarapukarthik0@gmail.com       |
+| Name                                  | Email                              |
+|---------------------------------------|------------------------------------|
+| Davu Gopi Kiran                       | gopikiran22001@yahoo.com           |
+| Lakshman Singh Naik Bhukya            | lakshmannaikbhukya17@gmail.com     |
+| Ganjam Kodanda Rama Venkata Koushik   | gkrvkoushik@gmail.com              |
+| Annavarapu Venkata Naga Karthik       | annavarapukarthik0@gmail.com       |
