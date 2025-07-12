@@ -1,6 +1,7 @@
 const express = require('express');
 
 const cors = require('cors');
+const cookieParser = require('cookie-parser'); // ✅ Add this
 
 
 require('dotenv').config();
@@ -11,7 +12,13 @@ const connectDB = require('./db');
 connectDB();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", // no trailing slash!
+  credentials: true
+}));
+app.use(cookieParser()); // ✅ Use it before your routes
+
+
 const productRoutes=require('./routes/productRoutes')
 const authRoutes=require('./routes/auth')
 const dbCheck=require('./middleware/dbCheck');
